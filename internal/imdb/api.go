@@ -733,9 +733,9 @@ func transformData(data []byte) (Items, error) {
 	}
 	if isRatingsList(header) {
 		for i, record := range records {
-			rating, err := strconv.Atoi(record[1])
+			rating, err := strconv.ParseFloat(record[1], 64)
 			if err != nil {
-				return nil, fmt.Errorf("failure parsing rating value to integer: %w", err)
+				return nil, fmt.Errorf("failure parsing rating value to float: %w", err)
 			}
 			created, err := time.Parse(time.DateOnly, record[2])
 			if err != nil {

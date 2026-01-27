@@ -18,7 +18,7 @@ type Item struct {
 	ID      string
 	Kind    string
 	Created time.Time
-	Rating  *int
+	Rating  *float64
 }
 
 func (it *Item) ToTraktItem() trakt.Item {

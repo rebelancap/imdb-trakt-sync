@@ -25,9 +25,10 @@ const (
 	pathRatings             = "/sync/ratings"
 	pathRatingsRemove       = "/sync/ratings/remove"
 	pathUserInfo            = "/users/me"
-	pathUserLists           = "/users/%s/lists"
+	pathUserList            = "/users/%s/lists/%s"
 	pathUserListItems       = "/users/%s/lists/%s/items"
 	pathUserListItemsRemove = "/users/%s/lists/%s/items/remove"
+	pathUserLists           = "/users/%s/lists"
 	pathWatchlist           = "/sync/watchlist"
 	pathWatchlistRemove     = "/sync/watchlist/remove"
 )
@@ -157,7 +158,25 @@ func (c *client) ListAdd(ctx context.Context, slug, name string) error {
 }
 
 func (c *client) ListGet(ctx context.Context, slug string) (*List, error) {
+	list, err := c.ListGetMeta(ctx, slug)
+	if err != nil {
+		return nil, fmt.Errorf("failure getting list meta: %w", err)
+	}
 	path := fmt.Sprintf(pathUserListItems, c.username, slug)
+	resp, err := doRequest(ctx, c.httpClient, http.MethodGet, c.baseURL, path, nil, http.NoBody, nil, http.StatusOK)
+	if err != nil {
+		return nil, fmt.Errorf("failure doing request: %w", err)
+	}
+	litems, err := decodeJSON[Items](resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failure decoding list response: %w", err)
+	}
+	list.ListItems = litems
+	return list, nil
+}
+
+func (c *client) ListGetMeta(ctx context.Context, slug string) (*List, error) {
+	path := fmt.Sprintf(pathUserList, c.username, slug)
 	resp, err := doRequest(ctx, c.httpClient, http.MethodGet, c.baseURL, path, nil, http.NoBody, nil, http.StatusOK, http.StatusNotFound)
 	if err != nil {
 		return nil, fmt.Errorf("failure doing request: %w", err)
@@ -165,16 +184,11 @@ func (c *client) ListGet(ctx context.Context, slug string) (*List, error) {
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, NewListNotFoundError(slug)
 	}
-	litems, err := decodeJSON[Items](resp.Body)
+	list, err := decodeJSON[List](resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failure decoding list response: %w", err)
 	}
-	return &List{
-		IDMeta: IDMeta{
-			Slug: slug,
-		},
-		ListItems: litems,
-	}, nil
+	return &list, nil
 }
 
 func (c *client) ListItemsAdd(ctx context.Context, slug string, its Items) error {

@@ -40,7 +40,7 @@ func (idms IDMetas) GetListNameFromSlug(slug string) string {
 type Item struct {
 	Type    string    `json:"type"`
 	RatedAt string    `json:"rated_at,omitempty"`
-	Rating  int       `json:"rating,omitempty"`
+	Rating  float64   `json:"rating,omitempty"`
 	Movie   ItemSpec  `json:"movie,omitempty"`
 	Show    ItemSpec  `json:"show,omitempty"`
 	Episode ItemSpec  `json:"episode,omitempty"`
@@ -85,10 +85,10 @@ func (its Items) toListBody() listBody {
 }
 
 type ItemSpec struct {
-	IDMeta    IDMeta  `json:"ids"`
-	RatedAt   *string `json:"rated_at,omitempty"`
-	Rating    *int    `json:"rating,omitempty"`
-	WatchedAt *string `json:"watched_at,omitempty"`
+	IDMeta    IDMeta   `json:"ids"`
+	RatedAt   *string  `json:"rated_at,omitempty"`
+	Rating    *float64 `json:"rating,omitempty"`
+	WatchedAt *string  `json:"watched_at,omitempty"`
 }
 
 type ItemSpecs []ItemSpec
