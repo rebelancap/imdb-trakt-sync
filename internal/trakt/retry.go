@@ -33,7 +33,7 @@ func (rt *retryTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		}
 		if resp.StatusCode == 420 {
 			resp.Body.Close()
-			return nil, NewAccountLimitExceededError()
+			return nil, NewAccountLimitExceededError(resp.Header)
 		}
 		if resp.StatusCode == http.StatusTooManyRequests {
 			resp.Body.Close()
